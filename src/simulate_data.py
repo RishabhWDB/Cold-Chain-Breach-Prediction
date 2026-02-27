@@ -46,12 +46,24 @@ def generate_shipment(shipment_id):
 
     return df
 
+def generate_dataset(n_shipments=2000):
+    data = []
+    for i in range(n_shipments):
+        data.append(generate_shipment(i))
+    df = pd.concat(data, ignore_index=True)
+    df.to_csv("data/raw_shipments.csv", index=False)  
+    print(df.shape)
+    return df
+
+
+
 if __name__ == "__main__":
     df = generate_shipment(1)
     print(df.head(10))
     print(df.shape)
     print(df["is_breached"].iloc[0])  # was it breached?
     print(df["inside_temp"].tail(10))
+    df = generate_dataset()
 
 
 
