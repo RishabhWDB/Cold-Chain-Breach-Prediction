@@ -1,0 +1,7 @@
+*.pkl
+*.pyc
+data/
+mlflow_store/
+venv/
+.env
+.DS_Store
