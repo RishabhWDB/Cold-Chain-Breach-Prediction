@@ -3,6 +3,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import pandas as pd
 from lightgbm import LGBMClassifier
+import mlflow
+import mlflow.lightgbm
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from src.features import build_features
 
@@ -22,16 +24,31 @@ def load_features():
 
 
 def train_model(X_train, y_train):
-    params = {
-    "n_estimators": 200,
-    "learning_rate": 0.05,
-    "max_depth": 6,
-    "random_state": 42
-    }
+    mlflow.set_experiment("cold-chain-breach-prediction")
 
-    model = LGBMClassifier(**params)
-    model.fit(X_train, y_train)
-    return model
+    with mlflow.start_run(run_name="lightgbm"):
+        params = {
+        "n_estimators": 200,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "random_state": 42
+        }
+
+        model = LGBMClassifier(**params)
+        model.fit(X_train, y_train)
+
+        for key, value in params.items():
+            mlflow.log_param(key, value)
+            
+        acc, f1, report = evaluate_model(model, X_test, y_test)
+        mlflow.log_metric("accuracy", acc)
+        mlflow.log_metric("f1", f1)
+
+        mlflow.lightgbm.log_model(model, "model")
+
+        return model
+    
+
 
 def evaluate_model(model, X_test, y_test):
     res = model.predict(X_test)
@@ -41,8 +58,6 @@ def evaluate_model(model, X_test, y_test):
     report = classification_report(y_test, res)
 
     return acc, f1, report
-
-
 
 
 if __name__ == "__main__":
