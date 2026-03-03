@@ -32,7 +32,7 @@ model = joblib.load("models/model.pkl")
 
 @app.post("/predict")
 def predict(features: ShipmentFeatures):
-    df = pd.DataFrame([features.dict()])
+    df = pd.DataFrame([features.model_dump()])
     prediction = model.predict(df)
     prediction_proba = model.predict_proba(df)
     return {
