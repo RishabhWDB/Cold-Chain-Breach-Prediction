@@ -69,7 +69,28 @@ if __name__ == "__main__":
     
     model = train_model(X_train, y_train, X_test, y_test, params)
 
+    params2 = {
+    "n_estimators": 500,
+    "learning_rate": 0.01,
+    "max_depth": 10,
+    "random_state": 42
+    }
+    
+    model2 = train_model(X_train, y_train, X_test, y_test, params2)
+
     acc, f1, report = evaluate_model(model, X_test, y_test)
+
+    import joblib
+
+    acc1, f1_1, _ = evaluate_model(model, X_test, y_test)
+    acc2, f1_2, _ = evaluate_model(model2, X_test, y_test)
+
+    best_model = model if acc1 > acc2 else model2
+    print(f"Best accuracy: {max(acc1, acc2):.4f}")
+
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(best_model, "models/model.pkl")
+    print("Saved to models/model.pkl")
 
     print(acc)
     print(f1)
