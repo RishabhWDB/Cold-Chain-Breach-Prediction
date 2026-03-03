@@ -6,3 +6,5 @@ venv/
 .env
 .DS_Store
 mlruns/
+mlflow.db
+__pycache__/
