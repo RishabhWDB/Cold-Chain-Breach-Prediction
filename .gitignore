@@ -1,6 +1,6 @@
 *.pkl
 *.pyc
-data/
+#data/
 mlflow_store/
 venv/
 .env
@@ -8,3 +8,5 @@ venv/
 mlruns/
 mlflow.db
 __pycache__/
+*.csv
+models/
