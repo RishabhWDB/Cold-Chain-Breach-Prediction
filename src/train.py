@@ -2,14 +2,17 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import pandas as pd
+from lightgbm import LGBMClassifier
+from sklearn.metrics import accuracy_score, f1_score, classification_report
 from src.features import build_features
 
 def load_features():
     df = pd.read_csv('data/raw_shipments.csv')
-
     df = build_features(df)
 
-    y = df["is_breached"]
+    y = df["is_breached"].astype(int)
+    #print(y.dtype)
+    #print(y.shape)
 
     df = pd.get_dummies(df, columns = ["product_type", "cooling_system"])
 
@@ -17,8 +20,42 @@ def load_features():
 
     return X,y
 
+
+def train_model(X_train, y_train):
+    params = {
+    "n_estimators": 200,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "random_state": 42
+    }
+
+    model = LGBMClassifier(**params)
+    model.fit(X_train, y_train)
+    return model
+
+def evaluate_model(model, X_test, y_test):
+    res = model.predict(X_test)
+
+    acc = accuracy_score(y_test,res)
+    f1 = f1_score(y_test, res)
+    report = classification_report(y_test, res)
+
+    return acc, f1, report
+
+
+
+
 if __name__ == "__main__":
+    from sklearn.model_selection import train_test_split
     X, y = load_features()
-    print(X.shape)
-    print(y.shape)
-    print(X.columns.tolist())
+    X_train, X_test, y_train, y_test = train_test_split(X, y , test_size = 0.2, random_state = 42)
+    #print(y_train.dtypes)
+    #print(type(y_train))
+    model = train_model(X_train, y_train)
+
+    acc, f1, report = evaluate_model(model, X_test, y_test)
+
+    print(acc)
+    print(f1)
+    print(report)
+
