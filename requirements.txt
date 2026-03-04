@@ -7,3 +7,4 @@ scikit-learn
 lightgbm
 mlflow
 pydantic
+optuna
