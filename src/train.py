@@ -7,15 +7,13 @@ import mlflow
 import mlflow.lightgbm
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from src.features import build_features
+import optuna
 
 def load_features():
     df = pd.read_csv('data/raw_shipments.csv')
     df = build_features(df)
 
     y = df["is_breached"].astype(int)
-    #print(y.dtype)
-    #print(y.shape)
-
     df = pd.get_dummies(df, columns = ["product_type", "cooling_system"])
     X = df.drop(columns = ["is_breached"])
 
@@ -40,6 +38,31 @@ def train_model(X_train, y_train, X_test, y_test, params):
         mlflow.lightgbm.log_model(model, "model")
 
         return model
+
+
+def optimize(X_train, y_train, X_test, y_test):
+    
+    def objective(trial):
+
+        params = {
+            "n_estimators": trial.suggest_int("n_estimators", 100, 500),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),  
+            "max_depth": trial.suggest_int("max_depth", 3, 10),      
+            "random_state": 42
+        }
+        
+        model = LGBMClassifier(**params)
+        model.fit(X_train, y_train)
+
+        acc, _, _ = evaluate_model(model, X_test, y_test)
+        
+        return acc
+
+    
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=20)
+    
+    return study.best_params
     
 
 
@@ -54,45 +77,21 @@ def evaluate_model(model, X_test, y_test):
 
 
 if __name__ == "__main__":
-    from sklearn.model_selection import train_test_split
-    X, y = load_features()
-    X_train, X_test, y_train, y_test = train_test_split(X, y , test_size = 0.2, random_state = 42)
-    #print(y_train.dtypes)
-    #print(type(y_train))
-
-    params = {
-        "n_estimators": 200,
-        "learning_rate": 0.05,
-        "max_depth": 6,
-        "random_state": 42
-        }
-    
-    model = train_model(X_train, y_train, X_test, y_test, params)
-
-    params2 = {
-    "n_estimators": 500,
-    "learning_rate": 0.01,
-    "max_depth": 10,
-    "random_state": 42
-    }
-    
-    model2 = train_model(X_train, y_train, X_test, y_test, params2)
-
-    acc, f1, report = evaluate_model(model, X_test, y_test)
 
     import joblib
+    from sklearn.model_selection import train_test_split
 
-    acc1, f1_1, _ = evaluate_model(model, X_test, y_test)
-    acc2, f1_2, _ = evaluate_model(model2, X_test, y_test)
+    X, y = load_features()
+    X_train, X_test, y_train, y_test = train_test_split(X, y , test_size = 0.2, random_state = 42)
 
-    best_model = model if acc1 > acc2 else model2
-    print(f"Best accuracy: {max(acc1, acc2):.4f}")
+    best_params = optimize(X_train, y_train, X_test, y_test)
+    print(f"Best params : {best_params}")
+
+    model = train_model(X_train, y_train, X_test, y_test, best_params)
 
     os.makedirs("models", exist_ok=True)
-    joblib.dump(best_model, "models/model.pkl")
+    joblib.dump(model, "models/model.pkl")
     print("Saved to models/model.pkl")
 
-    print(acc)
-    print(f1)
-    print(report)
+ 
 
