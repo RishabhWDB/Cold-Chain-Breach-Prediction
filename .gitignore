@@ -10,3 +10,4 @@ mlflow.db
 __pycache__/
 *.csv
 models/
+mlartifacts/
