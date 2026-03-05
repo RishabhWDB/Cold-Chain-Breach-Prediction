@@ -28,7 +28,7 @@ python src/simulate_data.py
 python src/train.py
 ```
 
-View experiments at `http://localhost:5000` after running `mlflow ui`.
+View experiments at `http://localhost:5001` after running `mlflow ui`.
 
 ## Run API Locally
 ```bash
