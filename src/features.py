@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 print(sys.path[0])
 import pandas as pd
-from simulate_data import PRODUCT_BASELINES 
+from src.simulate_data import PRODUCT_BASELINES 
 
 def aggregate_shipment(df):
     product_type = df["product_type"].iloc[0]
