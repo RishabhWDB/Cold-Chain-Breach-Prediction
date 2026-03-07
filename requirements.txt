@@ -8,3 +8,4 @@ lightgbm
 mlflow
 pydantic
 optuna
+pytest
