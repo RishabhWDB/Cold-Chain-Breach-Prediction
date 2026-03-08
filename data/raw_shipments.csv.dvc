@@ -1,0 +1,5 @@
+outs:
+- md5: cde6f86b611d4773a9030682ed0af08f
+  size: 12317339
+  hash: md5
+  path: raw_shipments.csv
