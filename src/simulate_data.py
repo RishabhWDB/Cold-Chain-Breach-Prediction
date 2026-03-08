@@ -38,6 +38,10 @@ def generate_shipment(shipment_id):
         for i in range(60):
             inside_temps[i] += i * random.uniform(0, 0.05)
 
+    # label noise
+    if random.random() < 0.08:
+        is_breached = not is_breached
+
     outside_temps = [np.random.uniform(25, 40) for _ in range(60)]
     humidities = [np.random.uniform(60, 90) for _ in range(60)]
     door_opens = [1 if np.random.random() < 0.05 else 0 for _ in range(60)]
@@ -62,9 +66,7 @@ def generate_dataset(n_shipments=2000):
     df = pd.concat(data, ignore_index=True)
     df.to_csv("data/raw_shipments.csv", index=False)
     print(df.shape)
-    if random.random() < 0.08:
-        is_breached = not is_breached
-        return df
+    return df
 
 if __name__ == "__main__":
     df = generate_dataset()
