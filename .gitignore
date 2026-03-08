@@ -1,6 +1,5 @@
 *.pkl
 *.pyc
-#data/
 mlflow_store/
 venv/
 .env
@@ -11,3 +10,4 @@ __pycache__/
 *.csv
 models/
 mlartifacts/
+.dvc/local_storage/
